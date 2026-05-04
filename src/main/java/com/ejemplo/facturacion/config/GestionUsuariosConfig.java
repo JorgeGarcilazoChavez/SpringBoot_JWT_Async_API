@@ -31,10 +31,15 @@ public class GestionUsuariosConfig {
 
         http.httpBasic(Customizer.withDefaults());
 
+        http.httpBasic(httpBasic -> httpBasic.disable());
         http.csrf(csrf -> csrf.disable());
 
         http.authorizeHttpRequests(
-                c -> c.requestMatchers("/**").permitAll());
+                c -> c.requestMatchers("/autenticar", "/actuator/health").permitAll()
+                .requestMatchers("/v2/**", "/v1/**").hasAuthority("facturar")
+                .anyRequest().denyAll())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
